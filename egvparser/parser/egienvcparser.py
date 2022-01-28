@@ -42,7 +42,13 @@ def data_to_df(calibration : np.ndarray,
     calib_data_range = list(range(0,calibration.shape[0]))
 
     for idx in calib_data_range:
-        curr_df = pd.DataFrame(calibration[idx,:][0],
+        byte_adjusted_data = np.array(calibration[idx,:][0]).byteswap().newbyteorder()
+        """
+        To overcome 
+        ValueError: Big-endian buffer not supported on little-endian compiler 
+        pandas error
+        """
+        curr_df = pd.DataFrame(byte_adjusted_data,
                                 columns = colnames)
         curr_df['wafer_names'] = calib_names[idx]
 
