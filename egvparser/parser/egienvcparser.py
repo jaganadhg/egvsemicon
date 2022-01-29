@@ -85,7 +85,7 @@ def egienvec_parser(data_path: str, dkey: str = "LAMDATA") -> pd.DataFrame:
     base_data = sio.loadmat(data_path)
 
 
-    logging.info(f"Keys in the data are {base_data.keys()}")
+    #logging.info(f"Keys in the data are {base_data.keys()}")
 
     try:
         lam_data = base_data[dkey]
