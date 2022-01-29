@@ -25,7 +25,7 @@ def ndarry_todf(sensor_data : np.ndarray, colnames : list) -> pd.DataFrame:
     return sensor_frame
 
 
-def data_to_df(calibration : np.ndarray,
+def raw_data_to_df(calibration : np.ndarray,
                         calib_names : np.ndarray,
                         colnames : list,
                         fault_names : np.ndarray = None) -> pd.DataFrame:
@@ -38,7 +38,8 @@ def data_to_df(calibration : np.ndarray,
 
     calib_frame = None 
     calib_frame_list = list()
-    
+    colnames = [cname.strip() for cname in colnames]
+
     calib_data_range = list(range(0,calibration.shape[0]))
 
     for idx in calib_data_range:
@@ -54,6 +55,8 @@ def data_to_df(calibration : np.ndarray,
 
         if fault_names is not None:
             curr_df['fault_name'] = fault_names[idx]
+        else:
+            curr_df['fault_name'] = "calibration"
 
         calib_frame_list.append(curr_df)
 
@@ -65,7 +68,7 @@ def data_to_df(calibration : np.ndarray,
     return calib_frame
 
 
-def egienvec_parser(data_path : str,dkey : str = "LAMDATA") -> dict:
+def egienvec_parser(data_path : str,dkey : str = "LAMDATA") -> pd.DataFrame:
     """ Parse the eigenvector LAM Etch Data and return the vaues as dictionary
         Source of Data https://www.eigenvector.com/data/Etch/
         The data is in a Matlab struct file. Varibles in the files are
@@ -79,12 +82,14 @@ def egienvec_parser(data_path : str,dkey : str = "LAMDATA") -> dict:
         :param data_apth: Path to individual .mat file
         :param dkey: Key for the data LAMDATA for MACHINE_Data.mat,
          OESDATA for OES_DATA.mat and RFMDATA for RFM_DATA.mat
-        :returns data_dict: A dictonery encding the data ready for use in Python
+        :returns data_set: a pandas DataFrame contaning both calibration and test data
+        
     """
-
+    data_set = list()
     data_dict = dict()
     var_names = ['information','calibration','calib_names','test','test_names',
     'fault_names','variables']
+
     base_data = sio.loadmat(data_path)
 
     try:
@@ -94,10 +99,27 @@ def egienvec_parser(data_path : str,dkey : str = "LAMDATA") -> dict:
     except KeyError:
         print(f"The specified key {dkey} not found in the data!")
 
-    return data_dict
+    sensor_names = list(data_dict['variables']) 
+
+    calibration_data = raw_data_to_df(data_dict['calibration'],
+                                    data_dict['calib_names'],
+                                    sensor_names)
+
+    test_data = raw_data_to_df(data_dict['test'],
+                                    data_dict['test_names'],
+                                    sensor_names,
+                                    data_dict['fault_names'])
+
+    try:
+        data_set = pd.concat([calibration_data,
+                            test_data])
+    except:
+        print("May be empty data in the DataFrames!")
+
+    return data_set
 
 
 
 if __name__ == "__main__":
-    machine = egienvec_parser("RFM_DATA.mat", dkey="RFMDATA")
-    print(machine['variables'])
+    machine = egienvec_parser("/home/jaganadhg/AI_RND/Semiconductor/eigenvector/RFM_DATA.mat", dkey="RFMDATA")
+    
