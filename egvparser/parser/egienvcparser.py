@@ -89,6 +89,7 @@ def egienvec_parser(data_path: str, dkey: str = "LAMDATA") -> pd.DataFrame:
 
     try:
         lam_data = base_data[dkey]
+
         for idx, var_name in enumerate(var_names):
             data_dict[var_name] = lam_data[0, 0][idx]
     except KeyError:
@@ -123,7 +124,7 @@ def egienvec_parser(data_path: str, dkey: str = "LAMDATA") -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    matlab_data = "/home/jaganadhg/AI_RND/Semiconductor/eigenvector/RFM_DATA.mat"
+    matlab_data = "/home/jaganadhg/AI_RND/Semiconductor/eigenvector/MACHINE_Data.mat"
     machine = egienvec_parser(matlab_data,
-                              dkey="RFMDATA")
+                              dkey="LAMDATA")
     print(machine.head())
