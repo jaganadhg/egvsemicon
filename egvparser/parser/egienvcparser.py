@@ -24,7 +24,12 @@ def raw_data_to_df(calibration: np.ndarray,
 
     calib_frame = None
     calib_frame_list = list()
-    colnames = [cname.strip() for cname in colnames]
+
+    try:
+        colnames = [cname.strip() for cname in colnames]
+    except:
+        #If the Data OES colanumn names are Prak of Wavelength
+        colnames = colnames[0].tolist()
 
     calib_data_range = list(range(0, calibration.shape[0]))
 
@@ -79,6 +84,9 @@ def egienvec_parser(data_path: str, dkey: str = "LAMDATA") -> pd.DataFrame:
 
     base_data = sio.loadmat(data_path)
 
+
+    logging.info(f"Keys in the data are {base_data.keys()}")
+
     try:
         lam_data = base_data[dkey]
         for idx, var_name in enumerate(var_names):
@@ -87,6 +95,7 @@ def egienvec_parser(data_path: str, dkey: str = "LAMDATA") -> pd.DataFrame:
         logging.error(f"The specified key {dkey} not found in the data!")
 
     sensor_names = list(data_dict['variables'])
+    logging.info(f"The sensor names are {sensor_names}")
 
     logging.info(f"Processing calibration data for {dkey}")
 
@@ -114,7 +123,7 @@ def egienvec_parser(data_path: str, dkey: str = "LAMDATA") -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    matlab_data = "/home/jaganadhg/AI_RND/Semiconductor/eigenvector/MACHINE_Data.mat"
+    matlab_data = "/home/jaganadhg/AI_RND/Semiconductor/eigenvector/RFM_DATA.mat"
     machine = egienvec_parser(matlab_data,
-                              dkey="LAMDATA")
+                              dkey="RFMDATA")
     print(machine.head())
